@@ -81,12 +81,26 @@ class ZPLLabelPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugin):
         if kwargs['label_instance'].SUBDIR == 'part':
             tpart = object_to_print
             templ_path = part_templ_path
+            fields = {
+                'name': tpart.name,
+                'description': tpart.description,
+                'ipn': tpart.IPN,
+                'pk': tpart.pk,
+                'params': tpart.parameters_map(),
+                'category': tpart.category.name,
+                'category_path': tpart.category.pathstring
+            }
         elif kwargs['label_instance'].SUBDIR == 'stockitem':
             tpart = object_to_print.part
             templ_path = part_templ_path
         elif kwargs['label_instance'].SUBDIR == 'stocklocation':
             tpart = object_to_print
             templ_path = stocklocation_templ_path
+            fields = {
+                'name': tpart.name,
+                'description': tpart.description,
+                'pk': tpart.pk,
+            }
         else:
             print(f"!! Unsupported item type: {object_to_print.SUBDIR}")
             return
@@ -98,15 +112,7 @@ class ZPLLabelPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugin):
             print(f"ZPL: ERROR: failed to read template from file: {templ_path}")
             raise(e)
 
-        fields = {
-            'name': tpart.name,
-            'description': tpart.description,
-            'ipn': tpart.IPN,
-            'pk': tpart.pk,
-            'params': tpart.parameters_map(),
-            'category': tpart.category.name,
-            'category_path': tpart.category.pathstring
-        }
+
 
         # Give template access to the full part object + preprocessed fields
         raw_zpl = template.render(part=tpart, **fields).encode('utf-8')
