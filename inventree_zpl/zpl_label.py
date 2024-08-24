@@ -44,10 +44,15 @@ class ZPLLabelPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugin):
             'description': _('Network TCP timeout'),
             'default': 15,
         },
-        'TEMPLATE_PATH': {
-            'name': _('Template Path'),
+        'PART_TEMPLATE_PATH': {
+            'name': _('Part Template Path'),
             'description': _('ZPL Jinja2 template file path'),
-            'default': '/home/inventree/data/example_2x1.j2',
+            'default': '/home/inventree/data/part_2x1.j2',
+        },
+        'STOCKLOCATION_TEMPLATE_PATH': {
+            'name': _('Stocklocation Template Path'),
+            'description': _('ZPL Jinja2 template file path'),
+            'default': '/home/inventree/data/stocklocation_2x1.j2',
         },
     }
 
@@ -68,14 +73,20 @@ class ZPLLabelPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugin):
             zpl_timeout = 15
             print("ZPL: WARNING: TIMEOUT config option is invalid; defaulting to 15")
 
-        templ_path = self.get_setting('TEMPLATE_PATH')
+        part_templ_path = self.get_setting('PART_TEMPLATE_PATH')
+        stocklocation_templ_path = self.get_setting('STOCKLOCATION_TEMPLATE_PATH')
 
         object_to_print = kwargs['label_instance'].object_to_print
 
         if kwargs['label_instance'].SUBDIR == 'part':
             tpart = object_to_print
+            templ_path = part_templ_path
         elif kwargs['label_instance'].SUBDIR == 'stockitem':
             tpart = object_to_print.part
+            templ_path = part_templ_path
+        elif kwargs['label_instance'].SUBDIR == 'stocklocation':
+            tpart = object_to_print
+            templ_path = stocklocation_templ_path
         else:
             print(f"!! Unsupported item type: {object_to_print.SUBDIR}")
             return
